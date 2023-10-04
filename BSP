@@ -1,0 +1,144 @@
+import java.util.ArrayList;
+import java.util.List;
+
+class Line {
+    Point start;
+    Point end;
+
+    public Line(Point start, Point end) {
+        this.start = start;
+        this.end = end;
+    }
+}
+
+class Point {
+    int x, y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class BSPNode {
+    Line line;
+    BSPNode left;
+    BSPNode right;
+
+    public BSPNode(Line line) {
+        this.line = line;
+        this.left = null;
+        this.right = null;
+    }
+}
+
+public class BSP {
+    public static void main(String[] args) {
+        // Define the lines that form the outer rectangle and inner triangle
+        List<Line> lines = new ArrayList<>();
+
+        // Outer rectangle
+        lines.add(new Line(new Point(5, 0), new Point(5, 10))); // Head Node (Root)
+        lines.add(new Line(new Point(2, 0), new Point(2, 5))); // Leaf 1
+        lines.add(new Line(new Point(8, 0), new Point(8, 5))); // Node
+        lines.add(new Line(new Point(1, 0), new Point(1, 3))); // Leaf 2
+        lines.add(new Line(new Point(4, 0), new Point(4, 3))); // Node
+        lines.add(new Line(new Point(6, 0), new Point(6, 3))); // Node
+        lines.add(new Line(new Point(9, 0), new Point(9, 3))); // Leaf 3
+        lines.add(new Line(new Point(0, 0), new Point(0, 1))); // Leaf 4
+        lines.add(new Line(new Point(3, 0), new Point(3, 1))); // Node
+        lines.add(new Line(new Point(7, 0), new Point(7, 1))); // Node
+        lines.add(new Line(new Point(10, 0), new Point(10, 1))); // Leaf 5
+        lines.add(new Line(new Point(2, 1), new Point(2, 3))); // Node
+        lines.add(new Line(new Point(4, 1), new Point(4, 3))); // Node
+        lines.add(new Line(new Point(6, 1), new Point(6, 3))); // Leaf 6
+        lines.add(new Line(new Point(8, 1), new Point(8, 3))); // Node
+        lines.add(new Line(new Point(1, 1), new Point(1, 2))); // Leaf 7
+        lines.add(new Line(new Point(9, 1), new Point(9, 2))); // Leaf 8
+
+        // Start the BSP tree from the root line (e.g., the outer rectangle)
+        int startIndex = 0;
+
+        BSPNode root = buildBSP(lines, startIndex);
+        System.out.println("BSP Tree:");
+        printBSP(root);
+        System.out.println("\nIn-order traversal of the BSP tree:");
+        inOrderTraversal(root);
+    }
+
+    public static BSPNode buildBSP(List<Line> lines, int startIndex) {
+        if (lines.isEmpty() || startIndex < 0 || startIndex >= lines.size()) {
+            return null;
+        }
+
+        int medianIndex = startIndex;
+        Line medianLine = lines.get(medianIndex);
+
+        BSPNode node = new BSPNode(medianLine);
+
+        List<Line> leftLines = new ArrayList<>();
+        List<Line> rightLines = new ArrayList<>();
+
+        for (int i = 0; i < lines.size(); i++) {
+            if (i != medianIndex) {
+                // Check if the line crosses the median line
+                if (intersects(medianLine, lines.get(i))) {
+                    // Add the line to both sides if it intersects
+                    leftLines.add(lines.get(i));
+                    rightLines.add(lines.get(i));
+                } else if (isToLeft(lines.get(i).start, medianLine)) {
+                    leftLines.add(lines.get(i));
+                } else {
+                    rightLines.add(lines.get(i));
+                }
+            }
+        }
+
+        node.left = buildBSP(leftLines, 0);
+        node.right = buildBSP(rightLines, 0);
+
+        return node;
+    }
+
+    public static boolean intersects(Line a, Line b) {
+        // Implement logic to check if two lines intersect
+        // This involves checking if the endpoints of one line are on opposite sides of
+        // the other line.
+        // You can use the isToLeft and isToRight methods.
+        return isToLeft(a.start, b) != isToLeft(a.end, b) &&
+                isToLeft(b.start, a) != isToLeft(b.end, a);
+    }
+
+    public static void printBSP(BSPNode node) {
+        if (node == null) {
+            return;
+        }
+
+        System.out.println("Line: (" + node.line.start.x + "," + node.line.start.y + ") - (" + node.line.end.x + ","
+                + node.line.end.y + ")");
+        printBSP(node.left);
+        printBSP(node.right);
+    }
+
+    public static void inOrderTraversal(BSPNode node) {
+        if (node == null) {
+            return;
+        }
+
+        inOrderTraversal(node.left);
+        System.out.println("Line: (" + node.line.start.x + "," + node.line.start.y + ") - (" + node.line.end.x + ","
+                + node.line.end.y + ")");
+        inOrderTraversal(node.right);
+    }
+
+    public static boolean isToLeft(Point point, Line line) {
+        int vector1X = line.end.x - line.start.x;
+        int vector1Y = line.end.y - line.start.y;
+        int vector2X = point.x - line.start.x;
+        int vector2Y = point.y - line.start.y;
+
+        int crossProduct = (vector1X * vector2Y) - (vector1Y * vector2X);
+
+        return crossProduct > 0;
+    }
+}
