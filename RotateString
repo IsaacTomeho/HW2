@@ -1,0 +1,20 @@
+public class RotateString {
+
+    public static void main(String[] args) {
+        String s = "abc";
+        int[] rotations = {1, 2, 3};
+        rotateString(s, rotations);
+    }
+
+    public static void rotateString(String s, int[] rotations) {
+        int n = s.length();
+        for (int r : rotations) {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < n; i++) {
+                int newPos = (i + r) % n;
+                result.append(s.charAt(newPos));
+            }
+            System.out.println(result.toString());
+        }
+    }
+}
